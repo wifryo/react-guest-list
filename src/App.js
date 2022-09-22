@@ -26,15 +26,17 @@ function App() {
     setLastName('');
     setIsAttending(false);
   }
-
+  // duplicate IDs possible - amend!
+  let filteredArray = [];
   function deleteGuest(id) {
-    /* const bog = guests.filter((obj) => {
-      return obj.firstName !== id;
-    }); */
+    filteredArray = guests.filter((obj) => {
+      return obj.id !== id;
+    });
+    setGuests(filteredArray);
   }
 
   function logGuests() {
-    console.log(guests);
+    console.log(filteredArray);
   }
 
   return (
@@ -63,10 +65,11 @@ function App() {
               onKeyPress={handleEnter}
             />
             <br />
-            Attending?
+            <label id="attending">Is this guest attending?</label>
             <input
               checked={isAttending}
               type="checkbox"
+              id="attending"
               onChange={(event) => setIsAttending(event.currentTarget.checked)}
             />
           </form>
@@ -82,7 +85,7 @@ function App() {
                 <h3>{`Name: ${guest.firstName} ${guest.lastName}`}</h3>
                 <p>Guest attending: {guest.isAttending ? 'yes' : 'no'}</p>
                 <button
-                  onClick={() => deleteGuest(guest.firstName)}
+                  onClick={() => deleteGuest(guest.id)}
                 >{`Delete ${guest.firstName} ${guest.lastName}`}</button>
               </div>
             );
