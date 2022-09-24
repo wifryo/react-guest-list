@@ -6,65 +6,17 @@ function App() {
   const [lastName, setLastName] = useState('');
   const [guests, setGuests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [inputDisabled, setInputDisabled] = useState(true);
 
   const baseUrl = 'http://localhost:4000';
-  const handleEnter = (event) => {
-    if (event.key === 'Enter') {
-      addGuest();
-    }
-  };
 
-  /*   useEffect(() => {
-    logGuests().catch(() => {});
-  }, []); */
-
-  /*  useEffect(() => {
-    setLoading(true);
-    fetch(`${baseUrl}/guests`)
-      .then((res) => res.json())
-      .then((data) => {
-        setGuests(data);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) {
-    //return <LoadingComponent />;
-    console.log('loading');
+  async function logGuests() {
+    const response = await fetch(`${baseUrl}/guests`);
+    const tempGuests = await response.json();
+    setGuests(tempGuests);
   }
-
-  //return <MyRegularComponent />;
-  console.log('done'); */
-
-  useEffect(() => {
-    function fetchGuestsInfo() {
-      fetch(`${baseUrl}/guests`)
-        .then((res) => res.json())
-        .then(
-          (result) => {
-            setLoading(false);
-            setGuests(result);
-            console.log('done');
-          },
-
-          (err) => {
-            setLoading(false);
-            // setErrorMessage(err);
-            console.log(err);
-          },
-        );
-    }
-    console.log('loading');
-    fetchGuestsInfo();
-  }, []);
-
   async function addGuest() {
-    const response = await fetch(`${baseUrl}/guests`, {
+    await fetch(`${baseUrl}/guests`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -75,34 +27,56 @@ function App() {
         attending: false,
       }),
     });
-    logGuests();
+    await logGuests();
     setFirstName('');
     setLastName('');
   }
-  async function logGuests() {
-    const response = await fetch(`${baseUrl}/guests`);
-    const tempGuests = await response.json();
-    setGuests(tempGuests);
-    console.log(tempGuests);
+
+  async function handleEnter(event) {
+    if (event.key === 'Enter') {
+      await addGuest();
+    }
   }
+
+  useEffect(() => {
+    function fetchGuestsInfo() {
+      fetch(`${baseUrl}/guests`)
+        .then((res) => res.json())
+        .then(
+          (result) => {
+            setLoading(false);
+            setInputDisabled(false);
+            setGuests(result);
+            console.log('done');
+          },
+
+          (err) => {
+            setLoading(false);
+            setInputDisabled(false);
+            console.log(err);
+          },
+        );
+    }
+    console.log('loading');
+    fetchGuestsInfo();
+  }, []);
 
   async function deleteGuest(id) {
     await fetch(`${baseUrl}/guests/${id}`, {
       method: 'DELETE',
     });
-    logGuests();
+    await logGuests();
   }
 
   async function setGuestAttendance(id, checkboxResult) {
-    const response = await fetch(`${baseUrl}/guests/${id}`, {
+    await fetch(`${baseUrl}/guests/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ attending: checkboxResult }),
     });
-    const updatedGuest = await response.json();
-    console.log(updatedGuest);
+    await logGuests();
   }
 
   async function deleteAll() {
@@ -112,6 +86,7 @@ function App() {
       }),
     );
     await Promise.all(tempArray);
+    await logGuests();
   }
 
   return (
@@ -128,6 +103,7 @@ function App() {
               First name
             </label>
             <input
+              disabled={inputDisabled ? 'disabled' : ''}
               id="first"
               value={firstName}
               onClick={() => setFirstName('')}
@@ -138,6 +114,7 @@ function App() {
               Last name
             </label>
             <input
+              disabled={inputDisabled ? 'disabled' : ''}
               id="last"
               value={lastName}
               onClick={() => setLastName('')}
@@ -153,9 +130,6 @@ function App() {
             Delete guests (mean!)
           </button>
         </div>
-        {/* <br />
-        Wow, your guest's name is {firstName} {lastName}? bit weird
-        <br /> */}
         <p>{loading ? 'loading...' : ''}</p>
         <div>
           {guests.map((guest) => {
@@ -173,7 +147,7 @@ function App() {
 
                 <input
                   aria-label="attending"
-                  checked={guest.isAttending}
+                  checked={guest.attending}
                   type="checkbox"
                   onChange={(event) =>
                     setGuestAttendance(guest.id, event.currentTarget.checked)
