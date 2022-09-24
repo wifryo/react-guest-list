@@ -1,11 +1,11 @@
 import './App.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function App() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [guests, setGuests] = useState([]);
-  const [isAttending, setIsAttending] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const baseUrl = 'http://localhost:4000';
   const handleEnter = (event) => {
@@ -14,20 +14,54 @@ function App() {
     }
   };
 
-  /* function addGuest() {
-    const newGuest = {
-      firstName: firstName,
-      lastName: lastName,
-      isAttending: isAttending,
-      id: Math.random().toPrecision(5),
-    };
-    //console.log(newGuest);
-    const newState = [newGuest, ...guests];
-    setGuests(newState);
-    setFirstName('');
-    setLastName('');
-    setIsAttending(false);
-  } */
+  /*   useEffect(() => {
+    logGuests().catch(() => {});
+  }, []); */
+
+  /*  useEffect(() => {
+    setLoading(true);
+    fetch(`${baseUrl}/guests`)
+      .then((res) => res.json())
+      .then((data) => {
+        setGuests(data);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    //return <LoadingComponent />;
+    console.log('loading');
+  }
+
+  //return <MyRegularComponent />;
+  console.log('done'); */
+
+  useEffect(() => {
+    function fetchGuestsInfo() {
+      fetch(`${baseUrl}/guests`)
+        .then((res) => res.json())
+        .then(
+          (result) => {
+            setLoading(false);
+            setGuests(result);
+            console.log('done');
+          },
+
+          (err) => {
+            setLoading(false);
+            // setErrorMessage(err);
+            console.log(err);
+          },
+        );
+    }
+    console.log('loading');
+    fetchGuestsInfo();
+  }, []);
 
   async function addGuest() {
     const response = await fetch(`${baseUrl}/guests`, {
@@ -38,10 +72,12 @@ function App() {
       body: JSON.stringify({
         firstName: firstName,
         lastName: lastName,
-        attending: isAttending,
+        attending: false,
       }),
     });
     logGuests();
+    setFirstName('');
+    setLastName('');
   }
   async function logGuests() {
     const response = await fetch(`${baseUrl}/guests`);
@@ -51,20 +87,19 @@ function App() {
   }
 
   async function deleteGuest(id) {
-    const response = await fetch(`${baseUrl}/guests/${id}`, {
+    await fetch(`${baseUrl}/guests/${id}`, {
       method: 'DELETE',
     });
-    setGuests(await response.json());
+    logGuests();
   }
 
-  async function setGuestAttendance(id, event) {
-    console.log('guest id', id);
+  async function setGuestAttendance(id, checkboxResult) {
     const response = await fetch(`${baseUrl}/guests/${id}`, {
-      method: 'PATCH',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ attending: event.currentTarget.checked }),
+      body: JSON.stringify({ attending: checkboxResult }),
     });
     const updatedGuest = await response.json();
     console.log(updatedGuest);
@@ -82,21 +117,26 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>wabsite</h1>
-        <p>ha ha, welcome </p>
+        <h1>world of guests</h1>
+        <p>premium guest wrangling service </p>
       </header>
       <div>
         <br />
         <div id="data-test-id=guest">
           <form>
-            <label htmlFor="first">First name</label>
+            <label className="label" htmlFor="first">
+              First name
+            </label>
             <input
               id="first"
               value={firstName}
               onClick={() => setFirstName('')}
               onChange={(event) => setFirstName(event.currentTarget.value)}
             />
-            <label htmlFor="last">Last name</label>
+            <br />
+            <label className="label" htmlFor="last">
+              Last name
+            </label>
             <input
               id="last"
               value={lastName}
@@ -105,31 +145,39 @@ function App() {
               onKeyPress={handleEnter}
             />
             <br />
+            <br />
           </form>
-          <button onClick={() => addGuest()}>Add guest</button>
-          <button onClick={() => logGuests()}>Log guests</button>
-          <button onClick={() => deleteAll()}>Delete guests (mean!)</button>
+          {/* <button onClick={() => addGuest()}>Add guest</button>
+           */}{' '}
+          <button className="deleteButton" onClick={() => deleteAll()}>
+            Delete guests (mean!)
+          </button>
         </div>
-        <br />
+        {/* <br />
         Wow, your guest's name is {firstName} {lastName}? bit weird
+        <br /> */}
+        <p>{loading ? 'loading...' : ''}</p>
         <div>
-          {guests.map((guest, index) => {
-            //console.log(index, 'index');
+          {guests.map((guest) => {
             return (
-              <div key={guest.id}>
-                <h3>{`Name: ${guest.firstName} ${guest.lastName}`}</h3>
-                <p>Guest attending: {guest.isAttending ? 'yes' : 'no'}</p>
+              <div key={guest.id} className="guests">
+                <div className="item">{`Name: ${guest.firstName} ${guest.lastName}`}</div>
+
                 <button
+                  className="button"
                   onClick={() => deleteGuest(guest.id)}
                 >{`Remove ${guest.firstName} ${guest.lastName}`}</button>
-                {/* <button onClick={() => setGuestAttendance(guest.id)}>
-                  guest attendance test
-                </button> */}
+
                 <br />
+                <p className="guestAttending">Guest attending: </p>
+
                 <input
+                  aria-label="attending"
                   checked={guest.isAttending}
                   type="checkbox"
-                  onChange={(event) => setGuestAttendance(guest.id, event)}
+                  onChange={(event) =>
+                    setGuestAttendance(guest.id, event.currentTarget.checked)
+                  }
                 />
               </div>
             );

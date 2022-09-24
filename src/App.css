@@ -15,13 +15,51 @@
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.label {
+  padding-right: 10px;
 }
 
-.App-header {
+.deleteButton {
+  background-color: rgb(223, 75, 75);
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.deleteButton:hover {
+  background-color: red;
+  font-weight: bold;
+}
+
+.guests {
+  display: flex;
+  font-size: 20px;
+  border: 2px solid lightgray;
+  border-radius: 4px;
+}
+
+.guestAttending {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.item {
+  padding: 5px;
+  margin-right: 20px;
+  margin-left: 20px;
+  align-self: center;
+}
+
+.button {
+  margin: 20px 20px 20px 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: lightcoral;
+  border: 0;
+  border-radius: 4px;
+}
+
+.button:hover {
+  background-color: coral;
 }
 
 .App-link {
