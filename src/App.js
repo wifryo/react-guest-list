@@ -17,7 +17,7 @@ function App() {
     setGuests(tempGuests);
   }
   async function addGuest() {
-    await fetch(`${baseUrl}/guests`, {
+    const response = await fetch(`${baseUrl}/guests`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -28,9 +28,12 @@ function App() {
         attending: false,
       }),
     });
-    await logGuests();
     setFirstName('');
     setLastName('');
+    const newGuest = await response.json();
+    const updatedGuests = [...guests];
+    updatedGuests.push(newGuest);
+    setGuests(updatedGuests);
   }
 
   async function handleEnter(event) {
