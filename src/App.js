@@ -58,7 +58,7 @@ function App() {
           },
         );
     }
-    console.log('loading');
+    console.log('Loading');
     fetchGuestsInfo();
   }, []);
 
@@ -131,7 +131,7 @@ function App() {
             Delete guests (mean!)
           </button>
         </div>
-        <p>{loading ? 'loading...' : ''}</p>
+        <p>{loading ? 'Loading...' : ''}</p>
         <div>
           {guests.map((guest) => {
             return (
