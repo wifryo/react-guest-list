@@ -135,7 +135,7 @@ function App() {
         <div>
           {guests.map((guest) => {
             return (
-              <div key={guest.id} className="guests">
+              <div key={guest.id} className="guests" data-test-id="guest">
                 <div className="item">{`Name: ${guest.firstName} ${guest.lastName}`}</div>
 
                 <button
