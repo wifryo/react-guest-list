@@ -1,5 +1,5 @@
 import './App.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function App() {
   const [firstName, setFirstName] = useState('');
@@ -8,14 +8,15 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [inputDisabled, setInputDisabled] = useState(true);
 
+  const ref = useRef(null);
   const baseUrl =
     'https://express-guest-list-api-memory-data-store.wifryo.repl.co';
 
-  async function logGuests() {
+  /*   async function logGuests() {
     const response = await fetch(`${baseUrl}/guests`);
     const tempGuests = await response.json();
     setGuests(tempGuests);
-  }
+  } */
   async function addGuest() {
     const response = await fetch(`${baseUrl}/guests`, {
       method: 'POST',
@@ -39,6 +40,7 @@ function App() {
   async function handleEnter(event) {
     if (event.key === 'Enter') {
       await addGuest();
+      ref.current.focus();
     }
   }
 
@@ -66,21 +68,34 @@ function App() {
   }, []);
 
   async function deleteGuest(id) {
-    await fetch(`${baseUrl}/guests/${id}`, {
+    const response = await fetch(`${baseUrl}/guests/${id}`, {
       method: 'DELETE',
     });
-    await logGuests();
+    const deletedGuest = await response.json();
+    const updatedGuests = guests.filter(
+      (guest) => guest.id !== deletedGuest.id,
+    );
+    setGuests(updatedGuests);
   }
 
   async function setGuestAttendance(id, checkboxResult) {
-    await fetch(`${baseUrl}/guests/${id}`, {
+    const response = await fetch(`${baseUrl}/guests/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ attending: checkboxResult }),
     });
-    await logGuests();
+    const updatedGuest = await response.json();
+    let newGuestArray = [...guests];
+    newGuestArray = newGuestArray.map((guest) => {
+      if (guest.id === id) {
+        return updatedGuest;
+      } else {
+        return guest;
+      }
+    });
+    setGuests(newGuestArray);
   }
 
   async function deleteAll() {
@@ -90,7 +105,7 @@ function App() {
       }),
     );
     await Promise.all(tempArray);
-    await logGuests();
+    setGuests([]);
   }
 
   return (
@@ -107,6 +122,7 @@ function App() {
               First name
             </label>
             <input
+              ref={ref}
               disabled={inputDisabled ? 'disabled' : ''}
               id="first"
               value={firstName}
