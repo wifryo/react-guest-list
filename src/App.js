@@ -8,7 +8,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [inputDisabled, setInputDisabled] = useState(true);
 
-  const baseUrl = 'http://localhost:4000';
+  const baseUrl =
+    'https://express-guest-list-api-memory-data-store.wifryo.repl.co';
 
   async function logGuests() {
     const response = await fetch(`${baseUrl}/guests`);
